@@ -90,7 +90,7 @@ const PostForm = () => {
             onSubmit={handleSubmit(submit)}
             className="h-screen w-screen flex items-center justify-center p-6 bg-gray-100"
         >
-            <div className="w-full h-full max-w-6xl bg-white shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden">
+            <div className="w-full min-h-fit max-w-6xl bg-white shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden">
 
                 {/* Left Section (80%) */}
                 <div className="w-full md:w-4/5 p-6 space-y-6">
