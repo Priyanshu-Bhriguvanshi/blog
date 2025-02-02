@@ -5,15 +5,13 @@ import { RTE, Input } from "./index";
 import databaseService from "../appwrite/databaseCofig";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
+
 const PostForm = () => {
     const location = useLocation();
-    const post = location.state?.postData
-    console.log(post);
-    
-    // const post= postData || ""
+    const post = location.state?.postData;
     const navigate = useNavigate();
-    const userData = useSelector((state) => state.auth.userData)
-    //   console.log(userData)
+    const userData = useSelector((state) => state.auth.userData);
+
     const { register, handleSubmit, getValues, control, watch, setValue } = useForm({
         defaultValues: {
             title: post?.title || "",
@@ -24,18 +22,16 @@ const PostForm = () => {
         },
     });
 
-    // ✅ Function to generate slug dynamically
     const slugTransform = useCallback((value) => {
         return value
             ? value
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-zA-Z\d\s]+/g, "-") // Remove special characters
-                .replace(/\s+/g, "-") // Replace spaces with hyphens
+                  .trim()
+                  .toLowerCase()
+                  .replace(/[^a-zA-Z\d\s]+/g, "-") 
+                  .replace(/\s+/g, "-") 
             : "";
     }, []);
 
-    // ✅ Auto-update slug when title changes
     useEffect(() => {
         const subscription = watch((value, { name }) => {
             if (name === "title") {
@@ -45,19 +41,14 @@ const PostForm = () => {
         return () => subscription.unsubscribe();
     }, [watch, slugTransform, setValue]);
 
-    // ✅ Form submission handling
     const submit = async (data) => {
         let image = null;
         let updatedPost = null;
         let postUpload = null;
 
         if (post) {
-            console.log("I am Reach Here", data?.image[0]);
             if (data?.image[0]) {
                 image = await databaseService.createFile(data.image[0]);
-                console.log(post.featuredImage, "delete Image")
-                // await databaseService.deleteFile(post.featuredImage);
-                
             }
 
             updatedPost = await databaseService.updatePost(post.$id, {
@@ -68,18 +59,11 @@ const PostForm = () => {
             if (updatedPost) navigate(`/post/${updatedPost.slug}`);
         } else {
             if (data?.image[0]) {
-                console.log("I am here and proble is here");
-
                 image = await databaseService.createFile(data?.image[0]);
-                console.log("i am not here");
-
             }
-            const userId = userData.$id
-            const featuredImage = image?.$id
-            //   console.log("user data",{...data, userId ,featuredImage})
+            const userId = userData.$id;
+            const featuredImage = image?.$id;
             postUpload = await databaseService.createPost({ ...data, userId, featuredImage });
-            console.log("uploaded post", postUpload);
-
 
             if (postUpload) navigate(`/post/${postUpload.$id}`, { state: { postId: postUpload.$id } });
         }
@@ -88,13 +72,12 @@ const PostForm = () => {
     return (
         <form
             onSubmit={handleSubmit(submit)}
-            className="h-screen w-screen flex items-center justify-center p-6 bg-gray-100"
+            className="min-h-screen flex items-center justify-center p-4 bg-gray-100"
         >
-            <div className="w-full min-h-fit max-w-6xl bg-white shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden">
-
-                {/* Left Section (80%) */}
-                <div className="w-full md:w-4/5 p-6 space-y-6">
-                    <h2 className="text-2xl font-semibold text-gray-800">Create Post</h2>
+            <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden">
+                {/* Left Section */}
+                <div className="w-full md:w-2/3 p-6 space-y-4">
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800">Create Post</h2>
 
                     {/* Title Input */}
                     <Input
@@ -119,13 +102,16 @@ const PostForm = () => {
                     <RTE label="Content" name="content" control={control} defaultValue={getValues("content")} />
 
                     {/* Action Buttons */}
-                    <div className="flex justify-between mt-4">
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md shadow">
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button
+                            type="submit"
+                            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md shadow text-center"
+                        >
                             Submit
                         </button>
                         <button
                             type="button"
-                            className="px-4 py-2 bg-gray-400 text-white rounded-md shadow"
+                            className="w-full sm:w-auto px-4 py-2 bg-gray-400 text-white rounded-md shadow text-center"
                             onClick={() => navigate("/")}
                         >
                             Cancel
@@ -133,8 +119,8 @@ const PostForm = () => {
                     </div>
                 </div>
 
-                {/* Right Section (20%) */}
-                <div className="w-full md:w-1/5 p-6 bg-gray-200 flex flex-col items-center">
+                {/* Right Section */}
+                <div className="w-full md:w-1/3 p-6 bg-gray-200 flex flex-col items-center">
                     <h3 className="text-lg font-medium text-gray-700">Upload Image</h3>
 
                     {/* Image Upload Input */}
@@ -142,7 +128,7 @@ const PostForm = () => {
                         type="file"
                         accept="image/png, image/jpg, image/jpeg, image/gif"
                         {...register("image")}
-                        className="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2"
+                        className="mt-2 w-full border border-gray-300 rounded-lg shadow-sm p-2"
                     />
 
                     {/* Image Preview */}
@@ -150,7 +136,7 @@ const PostForm = () => {
                         <img
                             src={databaseService.getFilePreview(post.featuredImage)}
                             alt="Featured"
-                            className="w-full h-32 object-cover rounded-lg mt-4 shadow-md"
+                            className="w-full h-auto max-h-40 object-cover rounded-lg mt-4 shadow-md"
                         />
                     )}
 
